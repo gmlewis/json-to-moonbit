@@ -1,5 +1,3 @@
-[<img src="https://gmlewis.github.io/json-to-moonbit/resources/images/json-to-moonbit.png" alt="JSON-to-moonbit converts JSON to a Go struct"></a>](https://gmlewis.github.io/json-to-moonbit)
-
 Translates JSON into a MoonBit struct definition. [Check it out!](http://gmlewis.github.io/json-to-moonbit)
 
 This is based on Matt Holt's [json-to-go](http://mholt.github.io/json-to-go).
