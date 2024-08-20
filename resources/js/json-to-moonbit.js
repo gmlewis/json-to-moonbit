@@ -14,18 +14,28 @@
 */
 
 function jsonToMoonBit(json, typename, flatten = true, example = false, allOmitempty = false) {
+  flatten = true  // always flatten MoonBit
   let data
   let scope
-  let moonbit = ""
+  let moonbit = ''
   let tabs = 0
 
   const seen = {}
   const stack = []
-  let accumulator = ""
+  let accumulator = ''
   let innerTabs = 0
-  let parent = ""
+  let parent = ''
   let globallySeenTypeNames = []
-  let previousParents = ""
+  let previousParents = ''
+
+  // https://github.com/golang/lint/blob/5614ed5bae6fb75893070bdc0996a68765fdd275/lint.go#L771-L810
+  const commonInitialisms = [
+    "ACL", "API", "ASCII", "CPU", "CSS", "DNS", "EOF", "GUID", "HTML", "HTTP",
+    "HTTPS", "ID", "IP", "JSON", "LHS", "QPS", "RAM", "RHS", "RPC", "SLA",
+    "SMTP", "SQL", "SSH", "TCP", "TLS", "TTL", "UDP", "UI", "UID", "UUID",
+    "URI", "URL", "UTF8", "VM", "XML", "XMPP", "XSRF", "XSS"
+  ]
+  const reservedWords = ["type", "in", "for", "struct"]
 
   try {
     data = JSON.parse(json.replace(/(:\s*\[?\s*-?\d*)\.0/g, "$1.1")) // hack that forces Doubles to stay as Doubles
@@ -33,7 +43,7 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
   }
   catch (e) {
     return {
-      moonbit: "",
+      moonbit: '',
       error: e.message
     }
   }
@@ -74,7 +84,7 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
 
         const slice = flatten && ["struct", "slice"].includes(sliceType)
           ? `Array[${parent}]`
-          : `[]`
+          : `Array[`
 
         if (flatten && depth >= 2)
           appender(slice)
@@ -93,8 +103,7 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
                   value: scope[i][keyname],
                   count: 0
                 }
-              }
-              else {
+              } else {
                 const existingValue = allFields[keyname].value
                 const currentValue = scope[i][keyname]
 
@@ -143,32 +152,33 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
         }
         else if (sliceType == "slice") {
           parseScope(scope[0], depth)
-        }
-        else {
+        } else {
           if (flatten && depth >= 2) {
             appender(sliceType || "Json")
           } else {
             append(sliceType || "Json")
           }
         }
-      }
-      else {
+        if (slice === 'Array[') {
+          if (flatten && depth >= 2)
+            appender(']')
+          else
+            append(']')
+        }
+      } else {
         if (flatten) {
           if (depth >= 2) {
             appender(parent)
-          }
-          else {
+          } else {
             append(parent)
           }
         }
         parseStruct(depth + 1, innerTabs, scope, false, previousParents)
       }
-    }
-    else {
+    } else {
       if (flatten && depth >= 2) {
         appender(mbtType(scope))
-      }
-      else {
+      } else {
         append(mbtType(scope))
       }
     }
@@ -179,7 +189,7 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
       stack.push(
         depth >= 2
           ? "\n"
-          : ""
+          : ''
       )
     }
 
@@ -198,7 +208,7 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
       }
       seen[parent] = scopeKeys
 
-      appender(`${parentType} {\n`)
+      appender(`\n${parentType} {\n`)
       ++innerTabs
       const keys = Object.keys(scope)
       previousParents = parent
@@ -215,7 +225,7 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
           seenTypeNames.push(typename)
         }
 
-        appender(typename + " ")
+        appender(snakeCase(typename) + ' : ')  // ':' added here for fields in flattened a struct
         parent = typename
         parseScope(scope[keys[i]], depth)
         if (allOmitempty || (omitempty && omitempty[keys[i]] === true)) {
@@ -225,13 +235,15 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
         if (allOmitempty || (omitempty && omitempty[keys[i]] === true)) {
           appender(',omitempty')
         }
+        if (example && scope[keys[i]] !== '' && typeof scope[keys[i]] !== "object") {
+          appender('" example:"' + scope[keys[i]])
+        }
         appender('"`\n')
       }
       indenter(--innerTabs)
       appender("}")
       previousParents = oldParents
-    }
-    else {
+    } else {
       append(" {\n")
       ++tabs
       const keys = Object.keys(scope)
@@ -249,7 +261,7 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
           seenTypeNames.push(typename)
         }
 
-        append(typename + " ")
+        append(snakeCase(typename) + ' : ')  // ':' added here for fields in a struct
         parent = typename
         parseScope(scope[keys[i]], depth)
         if (allOmitempty || (omitempty && omitempty[keys[i]] === true)) {
@@ -259,7 +271,7 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
         if (allOmitempty || (omitempty && omitempty[keys[i]] === true)) {
           append(',omitempty')
         }
-        if (example && scope[keys[i]] !== "" && typeof scope[keys[i]] !== "object") {
+        if (example && scope[keys[i]] !== '' && typeof scope[keys[i]] !== "object") {
           append('" example:"' + scope[keys[i]])
         }
         append('"`\n')
@@ -274,7 +286,7 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
 
   function indent(tabs) {
     for (let i = 0; i < tabs; i++)
-      moonbit += '\t'
+      moonbit += '  '
   }
 
   function append(str) {
@@ -283,7 +295,7 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
 
   function indenter(tabs) {
     for (let i = 0; i < tabs; i++)
-      stack[stack.length - 1] += '\t'
+      stack[stack.length - 1] += '  '
   }
 
   function appender(str) {
@@ -320,9 +332,9 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
   function format(str) {
     str = formatNumber(str)
 
-    let sanitized = toProperCase(str).replace(/[^a-z0-9]/ig, "")
+    let sanitized = toProperCase(str).replace(/[^a-z0-9]/ig, '')
     if (!sanitized) {
-      return "NAMING_FAILED"
+      return "NamingFailed"
     }
 
     // After sanitizing the remaining characters can start with a number.
@@ -333,14 +345,14 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
   // Adds a prefix to a number to make an appropriate identifier in MoonBit
   function formatNumber(str) {
     if (!str)
-      return ""
+      return ''
     else if (str.match(/^\d+$/))
-      str = "Num" + str
+      str = 'Num' + str
     else if (str.charAt(0).match(/\d/)) {
       const numbers = {
-        '0': "Zero_", '1': "One_", '2': "Two_", '3': "Three_",
-        '4': "Four_", '5': "Five_", '6': "Six_", '7': "Seven_",
-        '8': "Eight_", '9': "Nine_"
+        '0': 'Zero_', '1': 'One_', '2': 'Two_', '3': 'Three_',
+        '4': 'Four_', '5': 'Five_', '6': 'Six_', '7': 'Seven_',
+        '8': 'Eight_', '9': 'Nine_'
       }
       str = numbers[str.charAt(0)] + str.substr(1)
     }
@@ -435,6 +447,30 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
       return "Json"
   }
 
+  // snakeCase converts a StructName to a valid variable_name.
+  function snakeCase(str) {
+    if (str.length < 2) { return str.toLowerCase() }
+    if (commonInitialisms.indexOf(str) >= 0) {
+      const s = str.toLowerCase()
+      return reservedWords.indexOf(s) >= 0 ? `${s}_` : s
+    }
+    str = str.substr(0, 1).toLowerCase() + str.substr(1)
+    if (reservedWords.indexOf(str) >= 0) { return `${str}_` }
+    return str.replace(/([A-Z]+)/g, function (unused, frag) {
+      if (commonInitialisms.indexOf(frag) >= 0) {
+        return `_${frag.toLowerCase()}`
+      } else {
+        return frag
+      }
+    }).replace(/([A-Z])([a-z]+)/g, function (unused, sep, frag) {
+      if (commonInitialisms.indexOf(`${sep}${frag.toUpperCase()}`) >= 0) {
+        return `_${sep.toLowerCase()}${frag.toLowerCase()}`
+      } else {
+        return `_${sep.toLowerCase()}${frag}`
+      }
+    })
+  }
+
   // Proper cases a string according to MoonBit conventions
   function toProperCase(str) {
     // ensure that the SCREAMING_SNAKE_CASE is converted to snake_case
@@ -442,24 +478,18 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
       str = str.toLowerCase()
     }
 
-    // https://github.com/golang/lint/blob/5614ed5bae6fb75893070bdc0996a68765fdd275/lint.go#L771-L810
-    const commonInitialisms = [
-      "ACL", "API", "ASCII", "CPU", "CSS", "DNS", "EOF", "GUID", "HTML", "HTTP",
-      "HTTPS", "ID", "IP", "JSON", "LHS", "QPS", "RAM", "RHS", "RPC", "SLA",
-      "SMTP", "SQL", "SSH", "TCP", "TLS", "TTL", "UDP", "UI", "UID", "UUID",
-      "URI", "URL", "UTF8", "VM", "XML", "XMPP", "XSRF", "XSS"
-    ]
-
     return str.replace(/(^|[^a-zA-Z])([a-z]+)/g, function (unused, sep, frag) {
-      if (commonInitialisms.indexOf(frag.toUpperCase()) >= 0)
+      if (commonInitialisms.indexOf(frag.toUpperCase()) >= 0) {
         return sep + frag.toUpperCase()
-      else
+      } else {
         return sep + frag[0].toUpperCase() + frag.substr(1).toLowerCase()
+      }
     }).replace(/([A-Z])([a-z]+)/g, function (unused, sep, frag) {
-      if (commonInitialisms.indexOf(sep + frag.toUpperCase()) >= 0)
+      if (commonInitialisms.indexOf(sep + frag.toUpperCase()) >= 0) {
         return (sep + frag).toUpperCase()
-      else
+      } else {
         return sep + frag
+      }
     })
   }
 
@@ -546,9 +576,9 @@ if (typeof module != 'undefined') {
       }
 
       const argument = val.replace(/-/g, '')
-      if (argument === "big")
+      if (argument === "big") {
         console.warn(`Warning: The argument '${argument}' has been deprecated and has no effect anymore`)
-      else {
+      } else {
         console.error(`Unexpected argument ${val} received`)
         process.exit(1)
       }
