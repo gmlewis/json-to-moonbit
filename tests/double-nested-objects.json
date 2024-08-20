@@ -1,0 +1,15 @@
+{
+    "first": {
+        "id": 1,
+        "type": {
+            "short": "owa",
+            "long": "objectwitharray"
+        }
+    },
+    "second": {
+        "id": 2,
+        "type": {
+            "long": "object"
+        }
+    }
+}
