@@ -588,10 +588,7 @@ if (typeof module != 'undefined') {
       const fs = require('fs')
       const json = fs.readFileSync(filename, 'utf8')
       jsonToMoonBitWithErrorHandling(json)
-      return
-    }
-
-    if (!filename) {
+    } else {
       bufs = []
       process.stdin.on('data', function (buf) {
         bufs.push(buf)
@@ -600,7 +597,6 @@ if (typeof module != 'undefined') {
         const json = Buffer.concat(bufs).toString('utf8')
         jsonToMoonBitWithErrorHandling(json)
       })
-      return
     }
   } else {
     module.exports = jsonToMoonBit
