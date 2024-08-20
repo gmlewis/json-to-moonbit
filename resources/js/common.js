@@ -26,8 +26,6 @@ $(function () {
     }
     else {
       var finalOutput = output.moonbit
-      if (typeof gofmt === 'function')
-        finalOutput = gofmt(output.moonbit)
       var coloredOutput = hljs.highlight("rust", finalOutput)
       $('#output').html(coloredOutput.value)
     }

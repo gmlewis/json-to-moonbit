@@ -6,7 +6,6 @@ var filesToCache = [
   './resources/js/highlight.min.js',
   './resources/js/json-to-moonbit.js',
   './resources/js/common.js',
-  './resources/js/gofmt.js',
   './resources/css/tomorrow.highlight.css',
   './resources/css/common.css',
 ]
