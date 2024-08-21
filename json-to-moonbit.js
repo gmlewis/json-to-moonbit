@@ -238,14 +238,15 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
         if (allOmitempty || (omitempty && omitempty[keys[i]] === true)) {
           appender('?')
         }
-        appender(' // `json:"' + keyname)
-        if (allOmitempty || (omitempty && omitempty[keys[i]] === true)) {
-          appender(',omitempty')
-        }
-        if (example && scope[keys[i]] !== '' && typeof scope[keys[i]] !== "object") {
-          appender('" example:"' + scope[keys[i]])
-        }
-        appender('"`\n')
+        // appender(' // `json:"' + keyname)
+        // if (allOmitempty || (omitempty && omitempty[keys[i]] === true)) {
+        //   appender(',omitempty')
+        // }
+        // if (example && scope[keys[i]] !== '' && typeof scope[keys[i]] !== "object") {
+        //   appender('" example:"' + scope[keys[i]])
+        // }
+        // appender('"`\n')
+        appender('\n')
         toJsonFn.push(`\n    "${keyname}": self.${snakeCaseTypename}.to_json(),`)
       }
       indenter(--innerTabs)
@@ -280,14 +281,15 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
         if (allOmitempty || (omitempty && omitempty[keys[i]] === true)) {
           append('?')
         }
-        append(' // `json:"' + keyname)
-        if (allOmitempty || (omitempty && omitempty[keys[i]] === true)) {
-          append(',omitempty')
-        }
-        if (example && scope[keys[i]] !== '' && typeof scope[keys[i]] !== "object") {
-          append('" example:"' + scope[keys[i]])
-        }
-        append('"`\n')
+        // append(' // `json:"' + keyname)
+        // if (allOmitempty || (omitempty && omitempty[keys[i]] === true)) {
+        //   append(',omitempty')
+        // }
+        // if (example && scope[keys[i]] !== '' && typeof scope[keys[i]] !== "object") {
+        //   append('" example:"' + scope[keys[i]])
+        // }
+        // append('"`\n')
+        append('\n')
         toJsonFn.push(`\n    "${keyname}": self.${snakeCaseTypename}.to_json(),`)
       }
       indent(--tabs)
