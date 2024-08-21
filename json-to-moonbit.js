@@ -205,10 +205,12 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
     }
 
     const seenTypeNames = []
+    const toJsonFn = ['\n\npub fn to_json(self : ']
 
     if (flatten && depth >= 2) {
       const parentType = `pub struct ${parent}`
       const scopeKeys = formatScopeKeys(Object.keys(scope))
+      toJsonFn.push(') -> Json {\n  {')
 
       // this can only handle two duplicate items
       // future improvement will handle the case where there could
@@ -236,7 +238,8 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
           seenTypeNames.push(typename)
         }
 
-        appender(snakeCase(typename) + ' : ')  // ':' added here for fields in flattened a struct
+        const snakeCaseTypename = snakeCase(typename)
+        appender(snakeCaseTypename + ' : ')  // ':' added here for fields in flattened a struct
         parent = typename
         parseScope(scope[keys[i]], depth)
         if (allOmitempty || (omitempty && omitempty[keys[i]] === true)) {
@@ -250,9 +253,12 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
           appender('" example:"' + scope[keys[i]])
         }
         appender('"`\n')
+        toJsonFn.push(`\n    "${keyname}": self.${snakeCaseTypename}.to_json(),`)
       }
       indenter(--innerTabs)
       appender("} derive(Show, Eq)")
+      toJsonFn.push('\n  }\n}')
+      appender(toJsonFn.join(''))
       previousParents = oldParents
     } else {
       append(" {\n")
@@ -272,7 +278,8 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
           seenTypeNames.push(typename)
         }
 
-        append(snakeCase(typename) + ' : ')  // ':' added here for fields in a struct
+        const snakeCaseTypename = snakeCase(typename)
+        append(snakeCaseTypename + ' : ')  // ':' added here for fields in a struct
         parent = typename
         parseScope(scope[keys[i]], depth)
         if (allOmitempty || (omitempty && omitempty[keys[i]] === true)) {
@@ -286,9 +293,12 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
           append('" example:"' + scope[keys[i]])
         }
         append('"`\n')
+        toJsonFn.push(`\n    "${keyname}": self.${snakeCaseTypename}.to_json(),`)
       }
       indent(--tabs)
       append("} derive(Show, Eq)")
+      toJsonFn.push('\n  }\n}')
+      append(toJsonFn.join(''))
       previousParents = oldParents
     }
     if (flatten)
