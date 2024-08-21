@@ -26,9 +26,8 @@ $(function () {
     }
     else {
       var finalOutput = output.moonbit
-      // var coloredOutput = hljs.highlight("rust", finalOutput)
-      // $('#output').html(coloredOutput.value)
-      $('#output').html(finalOutput)
+      var coloredOutput = hljs.highlight("rust", finalOutput)
+      $('#output').html(coloredOutput.value)
     }
   }
 
