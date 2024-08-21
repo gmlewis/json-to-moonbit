@@ -164,11 +164,12 @@ function testFiles() {
     'array-with-nonmatching-types',
     'double-nested-objects',
     'duplicate-top-level-structs',
+    'smarty-streets-api',
     'struct-of-array-of-struct',
   ]
 
   for (const testCase of testCases) {
-
+    console.log(`\nRunning testCase: '${testCase}'`)
     try {
       const jsonData = fs.readFileSync(path.join('tests', testCase + '.json'), 'utf8')
       const expectedMoonBitData = fs.readFileSync(path.join('tests', testCase + '.mbt'), 'utf8')
