@@ -36,6 +36,8 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
     "URI", "URL", "UTF8", "VM", "XML", "XMPP", "XSRF", "XSS"
   ]
   const reservedWords = ["type", "in", "for", "struct"]
+  const eachExn = `\n\nfn each_exn[T](arr : Array[T], func : (T) -> Unit!@json.JsonDecodeError) -> Unit!@json.JsonDecodeError {\n  for i = 0; i < arr.length(); i = i + 1 {\n    func!(arr[i])\n  }\n}\n`
+  let needEachExn = false
 
   try {
     data = JSON.parse(json.replace(/(:\s*\[?\s*-?\d*)\.0/g, "$1.1")) // hack that forces Doubles to stay as Doubles
@@ -53,16 +55,13 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
 
   parseScope(scope)
 
-  if (flatten)
-    moonbit += accumulator
+  if (flatten) { moonbit += accumulator }
+  if (needEachExn) { moonbit += eachExn }
 
   // add final newline for POSIX 3.206
-  if (!moonbit.endsWith(`\n`))
-    moonbit += `\n`
+  if (!moonbit.endsWith(`\n`)) { moonbit += `\n` }
 
-  return {
-    moonbit
-  }
+  return { moonbit }
 
 
   function parseScope(scope, depth = 0) {
