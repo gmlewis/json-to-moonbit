@@ -124,12 +124,12 @@ function testFiles() {
   const path = require('path')
 
   const testCases = [
-    'array-with-mixed-float-int',
-    'array-with-nonmatching-types',
-    'double-nested-objects',
-    'duplicate-top-level-structs',
-    'smarty-streets-api',
-    'struct-of-array-of-struct',
+    'test1/array-with-mixed-float-int',
+    'test2/array-with-nonmatching-types',
+    'test3/double-nested-objects',
+    'test4/duplicate-top-level-structs',
+    'test5/smarty-streets-api',
+    'test6/struct-of-array-of-struct',
   ]
 
   for (const testCase of testCases) {

@@ -1,0 +1,31 @@
+{
+  "age of the universe": [
+    {
+      "name": "in years",
+      "value": 6000
+    },
+    {
+      "name": "in seconds",
+      "value": 189216000000
+    },
+    {
+      "name": "in kapla",
+      "value": 1.388890903635169e-06
+    }
+  ],
+  "age of the earth": [
+    {
+      "name": "in eons (roughly)",
+      "value": 6e-6
+    },
+    {
+      "name": "in years",
+      "value": 6000
+    },
+    {
+      "name": "in seconds",
+      "value": 189216000000
+    }
+  ],
+  "date": "2024-08-22"
+}

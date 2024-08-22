@@ -1,3 +1,5 @@
+# gmlewis/json-to-moonbit
+
 Translates JSON into a MoonBit struct definition. [Check it out!](http://gmlewis.github.io/json-to-moonbit)
 
 This is based on Matt Holt's [json-to-go](http://mholt.github.io/json-to-go).
@@ -10,7 +12,7 @@ Things to note:
 
 Contributions are welcome! Open a pull request to fix a bug, or open an issue to discuss a new feature or change.
 
-### Usage
+## Usage
 
 - Read JSON file:
 
@@ -25,7 +27,19 @@ Contributions are welcome! Open a pull request to fix a bug, or open an issue to
   cat sample.json | node json-to-moonbit.js
   ```
 
-### Credits
+## Status
+
+The code has been updated to support compiler:
+
+```bash
+$ moon version --all
+moon 0.1.20240819 (284058b 2024-08-19) ~/.moon/bin/moon
+moonc v0.1.20240820+85e9a0dc8 ~/.moon/bin/moonc
+moonrun 0.1.20240820 (ecf5abc 2024-08-20) ~/.moon/bin/moonrun
+```
+
+
+## Credits
 
 JSON-to-Go is brought to you by Matt Holt ([mholt6](https://twitter.com/mholt6)).
 
