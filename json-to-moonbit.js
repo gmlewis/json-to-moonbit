@@ -523,10 +523,14 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
   }
 
   function isToJsonFieldNameIdentical(snakeCaseTypename, keyname) {
-    const newName = snakeCaseTypename.replace(/_$/, '').replace(/(_[a-z])/g, function (unused, sep) {
-      return sep.substr(1).toUpperCase()
-    })
-    return newName === keyname
+    // No translation appears to be performed by @json.ToJson.
+    // const newName = snakeCaseTypename.replace(/_$/, '').replace(/(_[a-z])/g, function (unused, sep) {
+    //   return sep.substr(1).toUpperCase()
+    // })
+    // if (newName !== keyname) {
+    //   console.log(`isToJsonFieldNameIdentical('${snakeCaseTypename}', '${keyname}') => '${newName}' - NOT IDENTICAL!`)
+    // }
+    return snakeCaseTypename === keyname
   }
 
   function uuidv4() {

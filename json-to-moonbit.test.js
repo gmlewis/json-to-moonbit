@@ -1,4 +1,5 @@
 const jsonToMoonBit = require("./json-to-moonbit")
+const Diff = require('./diff.min')
 
 function quote(str) {
   return "'" + str
@@ -156,17 +157,24 @@ function testFiles() {
     console.log(`\nRunning testCase: '${testCase}'`)
     try {
       const jsonData = fs.readFileSync(path.join('tests', testCase + '.json'), 'utf8')
-      const expectedMoonBitData = fs.readFileSync(path.join('tests', testCase + '.mbt'), 'utf8')
+      const expectedMoonBitFilename = path.join('tests', testCase + '.mbt')
+      const expectedMoonBitData = fs.readFileSync(expectedMoonBitFilename, 'utf8')
       const got = jsonToMoonBit(jsonData)
       if (got.error) {
         console.assert(!got.error, `format('${jsonData}'): ${got.error}`)
         process.exitCode = 18
       } else {
         const success = got.moonbit === expectedMoonBitData
-        console.assert(success,
-          `format('${jsonData}'): \n  got:  ${quote(got.moonbit)}\n  want: ${quote(expectedMoonBitData)}`
-        )
-        if (!success) process.exitCode = 19
+        if (!success) {
+          const diffs = Diff.diffLines(got.moonbit, expectedMoonBitData)
+          console.assert(success,
+            `\n\nformat('${jsonData}'): \n  got:  ${quote(got.moonbit)}\n  want: ${quote(expectedMoonBitData)}`
+          )
+          // const patch = Diff.createTwoFilesPatch("got.moonbit", expectedMoonBitFilename, got.moonbit, expectedMoonBitData)
+          const patch = Diff.createTwoFilesPatch(expectedMoonBitFilename, "got.moonbit", expectedMoonBitData, got.moonbit)
+          console.error(`diffs:\n${patch}`)
+          process.exitCode = 19
+        }
       }
     } catch (err) {
       console.error(err)

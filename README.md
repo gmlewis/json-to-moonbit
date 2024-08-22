@@ -44,3 +44,8 @@ moonrun 0.1.20240820 (ecf5abc 2024-08-20) ~/.moon/bin/moonrun
 JSON-to-Go is brought to you by Matt Holt ([mholt6](https://twitter.com/mholt6)).
 
 JSON-to-MoonBit is brought to you by Glenn Lewis.
+
+diff is Copyright (c) 2009-2015, Kevin Decker <kpdecker@gmail.com>
+All rights reserved.
+and is used for testing. It is from: https://github.com/kpdecker/jsdiff/
+with license: https://github.com/kpdecker/jsdiff/blob/master/LICENSE
