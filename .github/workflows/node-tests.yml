@@ -1,7 +1,7 @@
 ---
 name: json-to-moonbit tests
 
-on:  # yamllint disable-line rule:truthy
+on: # yamllint disable-line rule:truthy
   workflow_call:
   workflow_dispatch:
   push:
@@ -32,8 +32,8 @@ jobs:
         shell: bash
         run: |
           set -eEuo pipefail
-          got=$(node json-to-moonbit.js < tests/double-nested-objects.json)
-          exp=$(cat tests/double-nested-objects.mbt)
+          got=$(node json-to-moonbit.js < tests/test3/double-nested-objects.json)
+          exp=$(cat tests/test3/double-nested-objects.mbt)
           echo "got: '${got}'"
           [[ "${got}" == "${exp}" ]]
 
@@ -41,8 +41,8 @@ jobs:
         shell: bash
         run: |
           set -eEuo pipefail
-          got=$(node json-to-moonbit.js tests/double-nested-objects.json)
-          exp=$(cat tests/double-nested-objects.mbt)
+          got=$(node json-to-moonbit.js tests/test3/double-nested-objects.json)
+          exp=$(cat tests/test3/double-nested-objects.mbt)
           echo "got: '${got}'"
           [[ "${got}" == "${exp}" ]]
 
