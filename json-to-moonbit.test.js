@@ -129,6 +129,7 @@ function testFiles() {
     'test4/duplicate-top-level-structs',
     'test5/smarty-streets-api',
     'test6/struct-of-array-of-struct',
+    'test7/github-api-omitempty',
   ]
 
   for (const testCase of testCases) {
