@@ -264,7 +264,7 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
         // appender('"`\n')
         appender('\n')
         toJsonFn.push(`\n    "${keyname}": self.${snakeCaseVarname}.to_json(),`)
-        const matchType = mbtMatchType(scope, snakeCaseVarname, keyname, fromJsonMatchConversions, fromJsonMatchPostludes)
+        const matchType = mbtMatchType(scope, snakeCaseVarname, keyname, typename, fromJsonMatchConversions, fromJsonMatchPostludes)
         fromJsonMatchPreludes.push(`\n      "${keyname}": ${matchType},`)
       }
       indenter(--innerTabs)
@@ -327,7 +327,7 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
         // append('"`\n')
         append('\n')
         toJsonFn.push(`\n    "${keyname}": self.${snakeCaseVarname}.to_json(),`)
-        const matchType = mbtMatchType(scope, snakeCaseVarname, keyname, fromJsonMatchConversions, fromJsonMatchPostludes)
+        const matchType = mbtMatchType(scope, snakeCaseVarname, keyname, typename, fromJsonMatchConversions, fromJsonMatchPostludes)
         fromJsonMatchPreludes.push(`\n      "${keyname}": ${matchType},`)
       }
       indent(--tabs)
@@ -430,10 +430,11 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
   }
 
   // Determines the type to use in a Json Match expression
-  function mbtMatchType(scope, snakeCaseVarname, keyname, conversions, postludes) {
+  function mbtMatchType(scope, snakeCaseVarname, keyname, typename, conversions, postludes) {
     postludes.push(`\n        ${snakeCaseVarname},`)
     const matchType = mbtType(scope)
-    console.log(`mbtMatchType(scope='${JSON.stringify(scope)}', keyname='${keyname}'): matchType='${matchType}'`)
+    // const mbtTypeName = format(keyname)
+    console.log(`mbtMatchType(scope='${JSON.stringify(scope)}', keyname='${keyname}'): matchType='${matchType}', typename='${typename}'`)
     switch (matchType) {
       case 'struct':
         const subType = mbtType(scope[keyname])
@@ -448,8 +449,10 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
             conversions.push(`\n      let ${snakeCaseVarname} = ${snakeCaseVarname}.to_int()`)
             break
           case 'slice':
-            const mbtTypeName = format(keyname)
-            conversions.push(`\n      let ${snakeCaseVarname} : Array[${mbtTypeName}] = ${snakeCaseVarname}_array_from_json!(${snakeCaseVarname})`)
+            conversions.push(`\n      let ${snakeCaseVarname} : Array[${typename}] = ${snakeCaseVarname}_array_from_json!(${snakeCaseVarname})`)
+            break
+          case 'struct':
+            conversions.push(`\n      let ${snakeCaseVarname} : ${typename} = @json.from_json!(${snakeCaseVarname})`)
             break
         }
         const subMatchType = matchSubTypeLookup[subType] || subType
