@@ -239,11 +239,9 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
         // structs will be defined on the top level of the moonbit file, so they need to be globally unique
         if (typeof scope[keys[i]] === "object" && scope[keys[i]] !== null) {
           typename = uniqueTypeName(format(keyname), globallySeenTypeNames, previousParents)
-          console.log(`GMLA: typename=${typename}`)
           globallySeenTypeNames.push(typename)
         } else {
           typename = uniqueTypeName(format(keyname), seenTypeNames)
-          console.log(`GMLB: typename=${typename}`)
           seenTypeNames.push(typename)
         }
 
@@ -304,11 +302,9 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
         // structs will be defined on the top level of the moonbit file, so they need to be globally unique
         if (typeof scope[keys[i]] === "object" && scope[keys[i]] !== null) {
           typename = uniqueTypeName(format(keyname), globallySeenTypeNames, previousParents)
-          console.log(`GML1: typename=${typename}`)
           globallySeenTypeNames.push(typename)
         } else {
           typename = uniqueTypeName(format(keyname), seenTypeNames)
-          console.log(`GML2: typename=${typename}`)
           seenTypeNames.push(typename)
         }
 
@@ -438,8 +434,7 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
   function mbtMatchType(scope, snakeCaseVarname, keyname, typename, conversions, postludes, arrayHelper) {
     postludes.push(`\n        ${snakeCaseVarname},`)
     const matchType = mbtType(scope)
-    // const mbtTypeName = format(keyname)
-    console.log(`mbtMatchType(scope='${JSON.stringify(scope)}', keyname='${keyname}'): matchType='${matchType}', typename='${typename}'`)
+    // console.log(`mbtMatchType(scope='${JSON.stringify(scope)}', keyname='${keyname}'): matchType='${matchType}', typename='${typename}'`)
     switch (matchType) {
       case 'struct':
         const subType = mbtType(scope[keyname])
@@ -472,7 +467,7 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
             break
         }
         const subMatchType = matchSubTypeLookup[subType] || subType
-        console.log(`mbtMatchType(scope='${JSON.stringify(scope[keyname])}', keyname='${keyname}'): subType='${subType}', subMatchType='${subMatchType}'`)
+        // console.log(`mbtMatchType(scope='${JSON.stringify(scope[keyname])}', keyname='${keyname}'): subType='${subType}', subMatchType='${subMatchType}'`)
         if (subMatchType === 'Bool' || subMatchType === 'Json' || subMatchType === 'struct') {
           return snakeCaseVarname
         }
