@@ -238,9 +238,11 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
         // structs will be defined on the top level of the moonbit file, so they need to be globally unique
         if (typeof scope[keys[i]] === "object" && scope[keys[i]] !== null) {
           typename = uniqueTypeName(format(keyname), globallySeenTypeNames, previousParents)
+          console.log(`GMLA: typename=${typename}`)
           globallySeenTypeNames.push(typename)
         } else {
           typename = uniqueTypeName(format(keyname), seenTypeNames)
+          console.log(`GMLB: typename=${typename}`)
           seenTypeNames.push(typename)
         }
 
@@ -299,9 +301,11 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
         // structs will be defined on the top level of the moonbit file, so they need to be globally unique
         if (typeof scope[keys[i]] === "object" && scope[keys[i]] !== null) {
           typename = uniqueTypeName(format(keyname), globallySeenTypeNames, previousParents)
+          console.log(`GML1: typename=${typename}`)
           globallySeenTypeNames.push(typename)
         } else {
           typename = uniqueTypeName(format(keyname), seenTypeNames)
+          console.log(`GML2: typename=${typename}`)
           seenTypeNames.push(typename)
         }
 
@@ -429,20 +433,27 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
   function mbtMatchType(scope, snakeCaseVarname, keyname, conversions, postludes) {
     postludes.push(`\n        ${snakeCaseVarname},`)
     const matchType = mbtType(scope)
-    console.log(`mbtMatchType(scope='${JSON.stringify(scope)}', keyname='${keyname}') = '${matchType}'`)
+    console.log(`mbtMatchType(scope='${JSON.stringify(scope)}', keyname='${keyname}'): matchType='${matchType}'`)
     switch (matchType) {
       case 'struct':
         const subType = mbtType(scope[keyname])
         switch (subType) {
+          case 'Bool':
+            conversions.push(`\n      let ${snakeCaseVarname} = ${snakeCaseVarname}.as_bool().or_error!(@json.JsonDecodeError((path, "unable to parse bool")))`)
+            break
           case 'Int64':
             conversions.push(`\n      let ${snakeCaseVarname} = ${snakeCaseVarname}.to_int64()`)
             break
           case 'Int':
             conversions.push(`\n      let ${snakeCaseVarname} = ${snakeCaseVarname}.to_int()`)
             break
+          case 'slice':
+            const mbtTypeName = format(keyname)
+            conversions.push(`\n      let ${snakeCaseVarname} : Array[${mbtTypeName}] = ${snakeCaseVarname}_array_from_json!(${snakeCaseVarname})`)
+            break
         }
         const subMatchType = matchSubTypeLookup[subType] || subType
-        console.log(`mbtMatchType(scope='${JSON.stringify(scope[keyname])}', keyname='${keyname}'): subType = '${subType}', subMatchType='${subMatchType}'`)
+        console.log(`mbtMatchType(scope='${JSON.stringify(scope[keyname])}', keyname='${keyname}'): subType='${subType}', subMatchType='${subMatchType}'`)
         if (subMatchType === 'Bool' || subMatchType === 'Json' || subMatchType === 'struct') {
           return snakeCaseVarname
         }
