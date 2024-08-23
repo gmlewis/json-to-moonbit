@@ -41,7 +41,12 @@ pub impl @json.FromJson for AgeOfTheUniverse with from_json(json, path) {
     {
       "name": String(name),
       "value": Number(value),
-    } => { name, value }
+    } => {
+      {
+        name,
+        value,
+      }
+    }
     _ => raise @json.JsonDecodeError((path, "AgeOfTheUniverse::from_json: expected object"))
   }
 }
@@ -68,7 +73,13 @@ pub impl @json.FromJson for AgeOfTheEarth with from_json(json, path) {
     {
       "name": String(name),
       "value": Number(value),
-    } => { name, value: value.to_int64() }
+    } => {
+      let value = value.to_int64()
+      {
+        name,
+        value,
+      }
+    }
     _ => raise @json.JsonDecodeError((path, "AgeOfTheEarth::from_json: expected object"))
   }
 }

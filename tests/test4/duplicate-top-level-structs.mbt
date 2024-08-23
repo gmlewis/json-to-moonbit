@@ -45,7 +45,7 @@ pub impl @json.FromJson for Identifier with from_json(json, path) {
       let id = id.to_int()
       {
         type_,
-	id,
+        id,
       }
     }
     _ => raise @json.JsonDecodeError((path, "Identifier::from_json: expected object"))
@@ -67,7 +67,7 @@ pub impl @json.FromJson for Region with from_json(json, path) {
       let autonomous = autonomous.as_bool().or_error!(@json.JsonDecodeError((path, "unable to parse bool")))
       {
         identifier,
-	autonomous,
+        autonomous,
       }
     }
     _ => raise @json.JsonDecodeError((path, "Region::from_json: expected object"))
@@ -94,7 +94,7 @@ pub impl @json.FromJson for MunicipalityIdentifier with from_json(json, path) {
     } => {
       {
         type_,
-	name,
+        name,
       }
     }
     _ => raise @json.JsonDecodeError((path, "MunicipalityIdentifier::from_json: expected object"))
@@ -146,7 +146,7 @@ pub impl @json.FromJson for Postal with from_json(json, path) {
       let id = id.to_int()
       {
         type_,
-	id,
+        id,
       }
     }
     _ => raise @json.JsonDecodeError((path, "Postal::from_json: expected object"))
@@ -167,7 +167,7 @@ pub impl @json.FromJson for Road with from_json(json, path) {
       let id = id.to_int()
       {
         name,
-	id,
+        id,
       }
     }
     _ => raise @json.JsonDecodeError((path, "Road::from_json: expected object"))
@@ -189,7 +189,7 @@ pub impl @json.FromJson for BuildingIdentifier with from_json(json, path) {
       let road : Road = @json.from_json!(road)
       {
         postal,
-	road,
+        road,
       }
     }
     _ => raise @json.JsonDecodeError((path, "BuildingIdentifier::from_json: expected object"))
