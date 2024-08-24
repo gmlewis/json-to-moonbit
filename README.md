@@ -33,9 +33,9 @@ The code has been updated to support compiler:
 
 ```bash
 $ moon version --all
-moon 0.1.20240819 (284058b 2024-08-19) ~/.moon/bin/moon
-moonc v0.1.20240820+85e9a0dc8 ~/.moon/bin/moonc
-moonrun 0.1.20240820 (ecf5abc 2024-08-20) ~/.moon/bin/moonrun
+moon 0.1.20240823 (f608aa3 2024-08-23) ~/.moon/bin/moon
+moonc v0.1.20240823+c622a5ab0 ~/.moon/bin/moonc
+moonrun 0.1.20240822 (efda7a5 2024-08-22) ~/.moon/bin/moonrun
 ```
 
 
