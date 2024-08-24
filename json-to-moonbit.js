@@ -1,3 +1,5 @@
+// -*- compile-command: "node json-to-moonbit.test.js"; -*-
+
 /*
   JSON-to-MoonBit by Glenn Lewis
   https://github.com/gmlewis/json-to-moonbit
@@ -12,6 +14,22 @@
 
   A simple utility to translate JSON into a Go type definition.
 */
+
+// https://github.com/golang/lint/blob/5614ed5bae6fb75893070bdc0996a68765fdd275/lint.go#L771-L810
+const commonInitialisms = [
+  "ACL", "API", "ASCII", "CPU", "CSS", "DNS", "EOF", "GUID", "HTML", "HTTP",
+  "HTTPS", "ID", "IP", "JSON", "LHS", "QPS", "RAM", "RHS", "RPC", "SLA",
+  "SMTP", "SQL", "SSH", "TCP", "TLS", "TTL", "UDP", "UI", "UID", "UUID",
+  "URI", "URL", "UTF8", "UTF16", "VM", "XML", "XMPP", "XSRF", "XSS"
+]
+const reservedWords = ["type", "in", "for", "struct"]
+const eachExn = `\n\nfn each_exn[T](arr : Array[T], func : (T) -> Unit!@json.JsonDecodeError) -> Unit!@json.JsonDecodeError {\n  for i = 0; i < arr.length(); i = i + 1 {\n    func!(arr[i])\n  }\n}\n`
+const matchSubTypeLookup = {
+  'slice': 'Array',
+  'Double': 'Number',
+  'Int64': 'Number',
+  'Int': 'Number',
+}
 
 function jsonToMoonBit(json, typename, flatten = true, example = false, allOmitempty = false) {
   flatten = true  // always flatten MoonBit
@@ -28,21 +46,6 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
   let globallySeenTypeNames = []
   let previousParents = ''
 
-  // https://github.com/golang/lint/blob/5614ed5bae6fb75893070bdc0996a68765fdd275/lint.go#L771-L810
-  const commonInitialisms = [
-    "ACL", "API", "ASCII", "CPU", "CSS", "DNS", "EOF", "GUID", "HTML", "HTTP",
-    "HTTPS", "ID", "IP", "JSON", "LHS", "QPS", "RAM", "RHS", "RPC", "SLA",
-    "SMTP", "SQL", "SSH", "TCP", "TLS", "TTL", "UDP", "UI", "UID", "UUID",
-    "URI", "URL", "UTF8", "VM", "XML", "XMPP", "XSRF", "XSS"
-  ]
-  const reservedWords = ["type", "in", "for", "struct"]
-  const eachExn = `\n\nfn each_exn[T](arr : Array[T], func : (T) -> Unit!@json.JsonDecodeError) -> Unit!@json.JsonDecodeError {\n  for i = 0; i < arr.length(); i = i + 1 {\n    func!(arr[i])\n  }\n}\n`
-  const matchSubTypeLookup = {
-    'slice': 'Array',
-    'Double': 'Number',
-    'Int64': 'Number',
-    'Int': 'Number',
-  }
   let needEachExn = false
 
   try {
@@ -236,16 +239,17 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
         const keyname = getOriginalName(keys[i])
         indenter(innerTabs)
         let typename
+        let safeToUseKeyname = false
         // structs will be defined on the top level of the moonbit file, so they need to be globally unique
         if (typeof scope[keys[i]] === "object" && scope[keys[i]] !== null) {
-          typename = uniqueTypeName(format(keyname), globallySeenTypeNames, previousParents)
+          [typename, safeToUseKeyname] = uniqueTypeName(format(keyname), globallySeenTypeNames, previousParents)
           globallySeenTypeNames.push(typename)
         } else {
-          typename = uniqueTypeName(format(keyname), seenTypeNames)
+          [typename, safeToUseKeyname] = uniqueTypeName(format(keyname), seenTypeNames)
           seenTypeNames.push(typename)
         }
 
-        const snakeCaseVarname = snakeCase(typename)
+        const snakeCaseVarname = snakeCase(typename, safeToUseKeyname ? keyname : '')
         if (!isToJsonFieldNameIdentical(snakeCaseVarname, keyname)) { allJsonFieldNamesIdentical = false }
         appender(snakeCaseVarname + ' : ')  // ':' added here for fields in flattened a struct
         parent = typename
@@ -299,16 +303,17 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
         const keyname = getOriginalName(keys[i])
         indent(tabs)
         let typename
+        let safeToUseKeyname = false
         // structs will be defined on the top level of the moonbit file, so they need to be globally unique
         if (typeof scope[keys[i]] === "object" && scope[keys[i]] !== null) {
-          typename = uniqueTypeName(format(keyname), globallySeenTypeNames, previousParents)
+          [typename, safeToUseKeyname] = uniqueTypeName(format(keyname), globallySeenTypeNames, previousParents)
           globallySeenTypeNames.push(typename)
         } else {
-          typename = uniqueTypeName(format(keyname), seenTypeNames)
+          [typename, safeToUseKeyname] = uniqueTypeName(format(keyname), seenTypeNames)
           seenTypeNames.push(typename)
         }
 
-        const snakeCaseVarname = snakeCase(typename)
+        const snakeCaseVarname = snakeCase(typename, keyname)
         if (!isToJsonFieldNameIdentical(snakeCaseVarname, keyname)) { allJsonFieldNamesIdentical = false }
         append(snakeCaseVarname + ' : ')  // ':' added here for fields in a struct
         parent = typename
@@ -374,16 +379,19 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
 
   // Generate a unique name to avoid duplicate struct field names.
   // This function appends a number at the end of the field name.
+  // If no modifications were made, then it returns true for the
+  // second part of a tuple meaning it is safe to use the original keyname
+  // without modification. This helps in handling the common initialisms.
   function uniqueTypeName(name, seen, prefix = null) {
     if (seen.indexOf(name) === -1) {
-      return name
+      return [name, true]
     }
 
     // check if we can get a unique name by prefixing it
     if (prefix) {
       name = prefix + name
       if (seen.indexOf(name) === -1) {
-        return name
+        return [name, false]
       }
     }
 
@@ -391,7 +399,7 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
     while (true) {
       let newName = name + i.toString()
       if (seen.indexOf(newName) === -1) {
-        return newName
+        return [newName, false]
       }
 
       i++
@@ -565,26 +573,30 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
   }
 
   // snakeCase converts a StructName to a valid variable_name.
-  function snakeCase(str) {
+  function snakeCase(str, keyname) {
+    // If the keyname is already lowercase and contains only letters and underscore, go ahead and use it.
+    if (keyname && keyname.match(/^[a-z_]+$/)) {
+      if (reservedWords.indexOf(keyname) >= 0) { return `${keyname}_` }
+      return keyname
+    }
     if (str.length < 2) { return str.toLowerCase() }
     if (commonInitialisms.indexOf(str) >= 0) {
       const s = str.toLowerCase()
       return reservedWords.indexOf(s) >= 0 ? `${s}_` : s
     }
+
     str = str.substr(0, 1).toLowerCase() + str.substr(1)
     if (reservedWords.indexOf(str) >= 0) { return `${str}_` }
     return str.replace(/([A-Z]+)/g, function (unused, frag) {
       if (commonInitialisms.indexOf(frag) >= 0) {
         return `_${frag.toLowerCase()}`
-      } else {
-        return frag
       }
+      return frag
     }).replace(/([A-Z])([a-z]+)/g, function (unused, sep, frag) {
       if (commonInitialisms.indexOf(`${sep}${frag.toUpperCase()}`) >= 0) {
         return `_${sep.toLowerCase()}${frag.toLowerCase()}`
-      } else {
-        return `_${sep.toLowerCase()}${frag}`
       }
+      return `_${sep.toLowerCase()}${frag}`
     })
   }
 
@@ -598,15 +610,13 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
     return str.replace(/(^|[^a-zA-Z])([a-z]+)/g, function (unused, sep, frag) {
       if (commonInitialisms.indexOf(frag.toUpperCase()) >= 0) {
         return sep + frag.toUpperCase()
-      } else {
-        return sep + frag[0].toUpperCase() + frag.substr(1).toLowerCase()
       }
+      return sep + frag[0].toUpperCase() + frag.substr(1).toLowerCase()
     }).replace(/([A-Z])([a-z]+)/g, function (unused, sep, frag) {
       if (commonInitialisms.indexOf(sep + frag.toUpperCase()) >= 0) {
         return (sep + frag).toUpperCase()
-      } else {
-        return sep + frag
       }
+      return sep + frag
     })
   }
 
