@@ -132,8 +132,8 @@ function testFiles() {
     'test1/array-with-mixed-float-int',
     'test2/array-with-nonmatching-types',
     'test3/double-nested-objects',
-//GML: TODO:     'test4/duplicate-top-level-structs',
-//GML: TODO:     'test5/smarty-streets-api',
+    'test4/duplicate-top-level-structs',
+    'test5/smarty-streets-api',
 //GML: TODO:     'test6/struct-of-array-of-struct',
     'test7/github-api-omitempty',
   ]
