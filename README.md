@@ -1,6 +1,6 @@
 # gmlewis/json-to-moonbit
 
-Translates JSON into a MoonBit struct definition. [Check it out!](http://gmlewis.github.io/json-to-moonbit)
+Translates JSON into MoonBit code. [Check it out!](http://gmlewis.github.io/json-to-moonbit)
 
 This is based on Matt Holt's [json-to-go](http://mholt.github.io/json-to-go).
 
