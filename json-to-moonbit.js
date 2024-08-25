@@ -31,6 +31,10 @@ const matchSubTypeLookup = {
   'Int': 'Number',
   // 'Time': 'String',  // TODO: support time
 }
+const typeToDefaultValue = {
+  'String': '""',
+  'slice': '[]',
+}
 
 function jsonToMoonBit(json, typename, flatten = true, example = false, allOmitempty = false) {
   flatten = true  // always flatten MoonBit
@@ -91,7 +95,7 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
           }
         }
 
-        const slice = flatten && ["struct", "slice"].includes(sliceType) && parent
+        const slice = flatten && ['struct', 'slice'].includes(sliceType) && parent
           ? `Array[${parent}]`
           : sliceType && sliceType !== 'struct' ? 'Array[' : 'Array'
         if (depth === 0 && !parent && sliceType === 'struct' && slice === 'Array') {
@@ -104,7 +108,7 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
           appender(slice)
         else
           append(slice)
-        if (sliceType == "struct") {
+        if (sliceType == 'struct') {
           const allFields = {}
 
           // for each field counts how many times appears
@@ -164,13 +168,13 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
           }
           parseStruct(depth + 1, innerTabs, struct, omitempty, previousParents, slice) // finally parse the struct !!
         }
-        else if (sliceType == "slice") {
+        else if (sliceType == 'slice') {
           parseScope(scope[0], depth)
         } else {
           if (flatten && depth >= 2) {
-            appender(sliceType || "Json")
+            appender(sliceType || 'Json')
           } else {
-            append(sliceType || "Json")
+            append(sliceType || 'Json')
           }
         }
         if (slice === 'Array[') {
@@ -283,8 +287,8 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
         //   toJsonFn.push(`\n  match self.${snakeCaseVarname} {\n    Some(${snakeCaseVarname}) => json["${snakeCaseVarname}"] = ${snakeCaseVarname}.to_json()\n    _ => ()\n  }`)
         //   fromJsonFn.push(`\n  let ${snakeCaseVarname} : ${mbtValueType}? = match json.get("${snakeCaseVarname}") {\n    Some(${matchType}(${snakeCaseVarname})) => Some(${snakeCaseVarname})\n    _ => None\n  }`)
         // } else {
-        //   toJsonFn.push(`\n    "${keyname}": self.${snakeCaseVarname}.to_json(), // TODO: Fix This 1.`)
-        //   fromJsonFn.push(`\n  let ${snakeCaseVarname} : ${mbtValueType} = ${snakeCaseVarname} // TODO: Fix this 3.`)
+        //   toJsonFn.push(`\n    "${keyname}": self.${snakeCaseVarname}.to_json()`)
+        //   fromJsonFn.push(`\n  let ${snakeCaseVarname} : ${mbtValueType} = ${snakeCaseVarname}`)
         // }
         // fromJsonMatchPreludes.push(`\n      "${keyname}": ${matchType},`)
       }
@@ -484,12 +488,12 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
       case 'struct':
         const subType = mbtType(scope[keyname])
         const subMatchType = matchSubTypeLookup[subType] || subType
-        allBuilders.structNewConstructor.push(`\n    ${snakeCaseVarname}: ${isOption ? 'None' : subType},`)
+      allBuilders.structNewConstructor.push(`\n    ${snakeCaseVarname}: ${isOption ? 'None' : typeToDefaultValue[subType]},`)
         if (isOption) {
           allBuilders.toJsonFn.push(`\n  match self.${snakeCaseVarname} {\n    Some(${snakeCaseVarname}) => json["${snakeCaseVarname}"] = ${snakeCaseVarname}.to_json()\n    _ => ()\n  }`)
           // allBuilders.fromJsonFn.push(`\n  let ${snakeCaseVarname} : ${subType}? = match json.get("${snakeCaseVarname}") {\n    Some(${subMatchType}(${snakeCaseVarname})) => `) // Some(${snakeCaseVarname})\n    _ => None\n  }`)
         } else {
-          allBuilders.toJsonFn.push(`\n    "${keyname}": self.${snakeCaseVarname}.to_json(), // TODO: Fix This 1.`)
+          allBuilders.toJsonFn.push(`\n  json["${keyname}"] = self.${snakeCaseVarname}.to_json()`)
           // allBuilders.fromJsonFn.push(`\n  let ${snakeCaseVarname} : ${subType} = ${snakeCaseVarname} // TODO: Fix this 3.`)
         }
 
