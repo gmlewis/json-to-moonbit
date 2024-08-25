@@ -1,3 +1,3 @@
 #!/bin/bash -e
+bun json-to-moonbit.test.js
 moon test
-node json-to-moonbit.test.js

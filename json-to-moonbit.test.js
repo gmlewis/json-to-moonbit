@@ -1,4 +1,4 @@
-// -*- compile-command: "node json-to-moonbit.test.js"; -*-
+// -*- compile-command: "bun json-to-moonbit.test.js"; -*-
 
 const jsonToMoonBit = require("./json-to-moonbit")
 const Diff = require('./diff.min')
