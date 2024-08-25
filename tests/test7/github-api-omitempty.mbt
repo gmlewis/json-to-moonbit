@@ -618,7 +618,7 @@ pub impl @json.FromJson for Owner with from_json(json, path) {
     Some(Null) | None => None
     _ => raise @json.JsonDecodeError((path, "Owner::from_json:received_events_url expected String or Null"))
   }
-  let type_ : String? = match json.get("type_") {
+  let type_ : String? = match json.get("type") {
     Some(String(type_)) => Some(type_)
     Some(Null) | None => None
     _ => raise @json.JsonDecodeError((path, "Owner::from_json:type_ expected String or Null"))
@@ -912,7 +912,7 @@ pub impl @json.FromJson for Organization with from_json(json, path) {
     Some(Null) | None => None
     _ => raise @json.JsonDecodeError((path, "Organization::from_json:received_events_url expected String or Null"))
   }
-  let type_ : String? = match json.get("type_") {
+  let type_ : String? = match json.get("type") {
     Some(String(type_)) => Some(type_)
     Some(Null) | None => None
     _ => raise @json.JsonDecodeError((path, "Organization::from_json:type_ expected String or Null"))
@@ -1142,7 +1142,7 @@ pub impl @json.FromJson for ParentOwner with from_json(json, path) {
     Some(Null) | None => None
     _ => raise @json.JsonDecodeError((path, "ParentOwner::from_json:received_events_url expected String or Null"))
   }
-  let type_ : String? = match json.get("type_") {
+  let type_ : String? = match json.get("type") {
     Some(String(type_)) => Some(type_)
     Some(Null) | None => None
     _ => raise @json.JsonDecodeError((path, "ParentOwner::from_json:type_ expected String or Null"))
@@ -1438,7 +1438,7 @@ pub impl @json.FromJson for Parent with from_json(json, path) {
     Some(Null) | None => None
     _ => raise @json.JsonDecodeError((path, "Parent::from_json:id expected Int or Null"))
   }
-  let parent_owner : ParentOwner? = match json.get("parent_owner") {
+  let parent_owner : ParentOwner? = match json.get("owner") {
     Some(Object(parent_owner)) => Some(@json.from_json!(parent_owner.to_json()))
     Some(Null) | None => None
     _ => raise @json.JsonDecodeError((path, "Parent::from_json:parent_owner expected ParentOwner or Null"))
@@ -1574,7 +1574,7 @@ pub impl @json.FromJson for Parent with from_json(json, path) {
     Some(Null) | None => None
     _ => raise @json.JsonDecodeError((path, "Parent::from_json:updated_at expected String or Null"))
   }
-  let parent_permissions : ParentPermissions? = match json.get("parent_permissions") {
+  let parent_permissions : ParentPermissions? = match json.get("permissions") {
     Some(Object(parent_permissions)) => Some(@json.from_json!(parent_permissions.to_json()))
     Some(Null) | None => None
     _ => raise @json.JsonDecodeError((path, "Parent::from_json:parent_permissions expected ParentPermissions or Null"))
@@ -1810,7 +1810,7 @@ pub impl @json.FromJson for SourceOwner with from_json(json, path) {
     Some(Null) | None => None
     _ => raise @json.JsonDecodeError((path, "SourceOwner::from_json:received_events_url expected String or Null"))
   }
-  let type_ : String? = match json.get("type_") {
+  let type_ : String? = match json.get("type") {
     Some(String(type_)) => Some(type_)
     Some(Null) | None => None
     _ => raise @json.JsonDecodeError((path, "SourceOwner::from_json:type_ expected String or Null"))
@@ -2106,7 +2106,7 @@ pub impl @json.FromJson for Source with from_json(json, path) {
     Some(Null) | None => None
     _ => raise @json.JsonDecodeError((path, "Source::from_json:id expected Int or Null"))
   }
-  let source_owner : SourceOwner? = match json.get("source_owner") {
+  let source_owner : SourceOwner? = match json.get("owner") {
     Some(Object(source_owner)) => Some(@json.from_json!(source_owner.to_json()))
     Some(Null) | None => None
     _ => raise @json.JsonDecodeError((path, "Source::from_json:source_owner expected SourceOwner or Null"))
@@ -2242,7 +2242,7 @@ pub impl @json.FromJson for Source with from_json(json, path) {
     Some(Null) | None => None
     _ => raise @json.JsonDecodeError((path, "Source::from_json:updated_at expected String or Null"))
   }
-  let source_permissions : SourcePermissions? = match json.get("source_permissions") {
+  let source_permissions : SourcePermissions? = match json.get("permissions") {
     Some(Object(source_permissions)) => Some(@json.from_json!(source_permissions.to_json()))
     Some(Null) | None => None
     _ => raise @json.JsonDecodeError((path, "Source::from_json:source_permissions expected SourcePermissions or Null"))

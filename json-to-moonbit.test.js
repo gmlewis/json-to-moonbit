@@ -129,7 +129,7 @@ function testFiles() {
   const path = require('path')
 
   const testCases = [
-//    'test1/array-with-mixed-float-int',
+    'test1/array-with-mixed-float-int',
 //GML: TODO:     'test2/array-with-nonmatching-types',
 //GML: TODO:     'test3/double-nested-objects',
 //GML: TODO:     'test4/duplicate-top-level-structs',
