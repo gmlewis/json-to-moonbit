@@ -134,7 +134,7 @@ function testFiles() {
     'test3/double-nested-objects',
     'test4/duplicate-top-level-structs',
     'test5/smarty-streets-api',
-//GML: TODO:     'test6/struct-of-array-of-struct',
+    'test6/struct-of-array-of-struct',
     'test7/github-api-omitempty',
   ]
 
