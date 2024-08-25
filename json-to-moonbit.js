@@ -25,18 +25,20 @@ const commonInitialisms = [
 const reservedWords = ["type", "in", "for", "struct"]
 const eachExn = `\n\nfn each_exn[T](arr : Array[T], func : (T) -> Unit!@json.JsonDecodeError) -> Unit!@json.JsonDecodeError {\n  for i = 0; i < arr.length(); i = i + 1 {\n    func!(arr[i])\n  }\n}\n`
 const matchSubTypeLookup = {
-  'slice': 'Array',
   'Double': 'Number',
-  'Int64': 'Number',
   'Int': 'Number',
+  'Int64': 'Number',
+  'slice': 'Array',
   // 'Time': 'String',  // TODO: support time
 }
 const typeToDefaultValue = {
-  'String': '""',
-  'slice': '[]',
+  'Bool': 'false',
   'Double': '0',
   'Int': '0',
   'Int64': '0',
+  'Json': 'Null',
+  'String': '""',
+  'slice': '[]',
 }
 
 function jsonToMoonBit(json, typename, flatten = true, example = false, allOmitempty = false) {
@@ -506,7 +508,7 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
             if (isOption) {
               allBuilders.fromJsonFn.push(`\n  let ${snakeCaseVarname} : ${subType}? = match json.get("${keyname}") {\n    Some(True) => Some(true)\n    Some(False) => Some(false)\n    Some(Null) | None => None\n    _ => raise @json.JsonDecodeError((path, "${parentName}::from_json:${snakeCaseVarname} expected Bool or Null"))\n  }`)
             } else {
-              allBuilders.fromJsonFn.push(`\n  let ${snakeCaseVarname} : ${subType}? = match json.get("${keyname}") {\n    Some(${subMatchType}(${snakeCaseVarname})) => ${snakeCaseVarname}.as_bool() // TODO-BOOL`)
+              allBuilders.fromJsonFn.push(`\n  let ${snakeCaseVarname} : ${subType} = match json.get("${keyname}") {\n    Some(True) => true\n    Some(False) => false\n   _ => raise @json.JsonDecodeError((path, "${parentName}::from_json:${snakeCaseVarname} expected Bool"))\n  }`)
             }
             break
           case 'Int64':
@@ -553,7 +555,7 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
             if (isOption) {
               allBuilders.fromJsonFn.push(`\n  let ${snakeCaseVarname} : ${subType}? = json.get("${keyname}")`)
             } else {
-              allBuilders.fromJsonFn.push(`\n  let ${snakeCaseVarname} : ${subType}? = match json.get("${keyname}") {\n    Some(${subMatchType}(${snakeCaseVarname})) => Some(${snakeCaseVarname}) // TODO-JSON`)
+              allBuilders.fromJsonFn.push(`\n  let ${snakeCaseVarname} : ${subType} = match json.get("${keyname}") {\n    Some(${snakeCaseVarname}) => ${snakeCaseVarname}\n    _ => raise @json.JsonDecodeError((path, "${parentName}::from_json:${snakeCaseVarname} expected valid Json"))\n  }`)
             }
             break
           default:

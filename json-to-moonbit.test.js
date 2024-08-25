@@ -130,7 +130,7 @@ function testFiles() {
 
   const testCases = [
     'test1/array-with-mixed-float-int',
-//GML: TODO:     'test2/array-with-nonmatching-types',
+    'test2/array-with-nonmatching-types',
 //GML: TODO:     'test3/double-nested-objects',
 //GML: TODO:     'test4/duplicate-top-level-structs',
 //GML: TODO:     'test5/smarty-streets-api',
