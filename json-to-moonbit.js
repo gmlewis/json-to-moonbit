@@ -34,6 +34,9 @@ const matchSubTypeLookup = {
 const typeToDefaultValue = {
   'String': '""',
   'slice': '[]',
+  'Double': '0',
+  'Int': '0',
+  'Int64': '0',
 }
 
 function jsonToMoonBit(json, typename, flatten = true, example = false, allOmitempty = false) {
@@ -488,7 +491,7 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
       case 'struct':
         const subType = mbtType(scope[keyname])
         const subMatchType = matchSubTypeLookup[subType] || subType
-      allBuilders.structNewConstructor.push(`\n    ${snakeCaseVarname}: ${isOption ? 'None' : typeToDefaultValue[subType]},`)
+        allBuilders.structNewConstructor.push(`\n    ${snakeCaseVarname}: ${isOption ? 'None' : typeToDefaultValue[subType] || 'unsupported subType: '+subType},`)
         if (isOption) {
           allBuilders.toJsonFn.push(`\n  match self.${snakeCaseVarname} {\n    Some(${snakeCaseVarname}) => json["${snakeCaseVarname}"] = ${snakeCaseVarname}.to_json()\n    _ => ()\n  }`)
           // allBuilders.fromJsonFn.push(`\n  let ${snakeCaseVarname} : ${subType}? = match json.get("${keyname}") {\n    Some(${subMatchType}(${snakeCaseVarname})) => `) // Some(${snakeCaseVarname})\n    _ => None\n  }`)
@@ -511,7 +514,7 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
             if (isOption) {
               allBuilders.fromJsonFn.push(`\n  let ${snakeCaseVarname} : ${subType}? = match json.get("${keyname}") {\n    Some(${subMatchType}(${snakeCaseVarname})) => Some(${snakeCaseVarname}.to_int64())\n    Some(Null) | None => None\n    _ => raise @json.JsonDecodeError((path, "${parentName}::from_json:${snakeCaseVarname} expected Int64 or Null"))\n  }`)
             } else {
-              allBuilders.fromJsonFn.push(`\n  let ${snakeCaseVarname} : ${subType}? = match json.get("${keyname}") {\n    Some(${subMatchType}(${snakeCaseVarname})) => Some(${snakeCaseVarname}.to_int64()) // TODO-INT64`)
+              allBuilders.fromJsonFn.push(`\n  let ${snakeCaseVarname} : ${subType} = match json.get("${keyname}") {\n    Some(${subMatchType}(${snakeCaseVarname})) => ${snakeCaseVarname}.to_int64()\n    _ => raise @json.JsonDecodeError((path, "${parentName}::from_json:${snakeCaseVarname} expected Int64"))\n  }`)
             }
             break
           case 'Int':
@@ -519,13 +522,13 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
             if (isOption) {
               allBuilders.fromJsonFn.push(`\n  let ${snakeCaseVarname} : ${subType}? = match json.get("${keyname}") {\n    Some(${subMatchType}(${snakeCaseVarname})) => Some(${snakeCaseVarname}.to_int())\n    Some(Null) | None => None\n    _ => raise @json.JsonDecodeError((path, "${parentName}::from_json:${snakeCaseVarname} expected Int or Null"))\n  }`)
             } else {
-              allBuilders.fromJsonFn.push(`\n  let ${snakeCaseVarname} : ${subType}? = match json.get("${keyname}") {\n    Some(${subMatchType}(${snakeCaseVarname})) => Some(${snakeCaseVarname}.to_int()) // TODO-INT64`)
+              allBuilders.fromJsonFn.push(`\n  let ${snakeCaseVarname} : ${subType} = match json.get("${keyname}") {\n    Some(${subMatchType}(${snakeCaseVarname})) => ${snakeCaseVarname}.to_int()\n    _ => raise @json.JsonDecodeError((path, "${parentName}::from_json:${snakeCaseVarname} expected Int"))\n  }`)
             }
             break
           case 'slice':
             // allBuilders.fromJsonMatchConversions.push(`\n      let ${snakeCaseVarname} : Array[${typename}] = ${snakeCaseVarname}_array_from_json!(${snakeCaseVarname})`)
             // TODO: if (isOption) {...
-            allBuilders.fromJsonFn.push(`\n  let ${snakeCaseVarname} : Array[${typename}] = match json.get(${keyname}) {\n    Some(Array(${snakeCaseVarname})) => ${snakeCaseVarname}_array_from_json!(${snakeCaseVarname})\n    e => raise @json.JsonDecodeError((path, "${parentName}::from_json:${snakeCaseVarname}: expected Array"))\n  }`)
+            allBuilders.fromJsonFn.push(`\n  let ${snakeCaseVarname} : Array[${typename}] = match json.get("${keyname}") {\n    Some(Array(${snakeCaseVarname})) => ${snakeCaseVarname}_array_from_json!(${snakeCaseVarname})\n    e => raise @json.JsonDecodeError((path, "${parentName}::from_json:${snakeCaseVarname}: expected Array: got \\{e}"))\n  }`)
             allBuilders.fromJsonMatchArrayHelpers.push(`\n\npub fn ${snakeCaseVarname}_array_from_json(json : Array[Json]) -> Array[${typename}]!@json.JsonDecodeError {
   let arr: Array[${typename}] = Array::new(capacity = json.length())
   each_exn!(
@@ -550,14 +553,14 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
             if (isOption) {
               allBuilders.fromJsonFn.push(`\n  let ${snakeCaseVarname} : ${subType}? = json.get("${keyname}")`)
             } else {
-              allBuilders.fromJsonFn.push(`\n  let ${snakeCaseVarname} : ${subType}? = match json.get("${keyname}") {\n    Some(${subMatchType}(${snakeCaseVarname})) => Some(${snakeCaseVarname}) // TODO-DEFAULT`)
+              allBuilders.fromJsonFn.push(`\n  let ${snakeCaseVarname} : ${subType}? = match json.get("${keyname}") {\n    Some(${subMatchType}(${snakeCaseVarname})) => Some(${snakeCaseVarname}) // TODO-JSON`)
             }
-	    break
+            break
           default:
             if (isOption) {
               allBuilders.fromJsonFn.push(`\n  let ${snakeCaseVarname} : ${subType}? = match json.get("${keyname}") {\n    Some(${subMatchType}(${snakeCaseVarname})) => Some(${snakeCaseVarname})\n    Some(Null) | None => None\n    _ => raise @json.JsonDecodeError((path, "${parentName}::from_json:${snakeCaseVarname} expected ${subType} or Null"))\n  }`)
             } else {
-              allBuilders.fromJsonFn.push(`\n  let ${snakeCaseVarname} : ${subType}? = match json.get("${keyname}") {\n    Some(${subMatchType}(${snakeCaseVarname})) => Some(${snakeCaseVarname}) // TODO-DEFAULT`)
+              allBuilders.fromJsonFn.push(`\n  let ${snakeCaseVarname} : ${subType} = match json.get("${keyname}") {\n    Some(${subMatchType}(${snakeCaseVarname})) => ${snakeCaseVarname}\n    _ => raise @json.JsonDecodeError((path, "${parentName}::from_json:${snakeCaseVarname}: expected ${subType}"))\n  }`)
             }
         }
         // console.log(`mbtMatchType(scope='${JSON.stringify(scope[keyname])}', keyname='${keyname}'): subType='${subType}', subMatchType='${subMatchType}'`)
