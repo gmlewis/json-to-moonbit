@@ -131,7 +131,7 @@ function testFiles() {
   const testCases = [
     'test1/array-with-mixed-float-int',
     'test2/array-with-nonmatching-types',
-//GML: TODO:     'test3/double-nested-objects',
+    'test3/double-nested-objects',
 //GML: TODO:     'test4/duplicate-top-level-structs',
 //GML: TODO:     'test5/smarty-streets-api',
 //GML: TODO:     'test6/struct-of-array-of-struct',

@@ -493,7 +493,17 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
       case 'struct':
         const subType = mbtType(scope[keyname])
         const subMatchType = matchSubTypeLookup[subType] || subType
-        allBuilders.structNewConstructor.push(`\n    ${snakeCaseVarname}: ${isOption ? 'None' : typeToDefaultValue[subType] || 'unsupported subType: '+subType},`)
+        const defaultValue = () => {
+          if (isOption) { return 'None' }
+          const lookup = typeToDefaultValue[subType]
+          if (lookup) { return lookup }
+          if (subType === 'struct') {
+            return `${typename}::new()`
+          }
+          return `unsupported subType: ${subType}`
+        }
+
+        allBuilders.structNewConstructor.push(`\n    ${snakeCaseVarname}: ${defaultValue()},`)
         if (isOption) {
           allBuilders.toJsonFn.push(`\n  match self.${snakeCaseVarname} {\n    Some(${snakeCaseVarname}) => json["${snakeCaseVarname}"] = ${snakeCaseVarname}.to_json()\n    _ => ()\n  }`)
           // allBuilders.fromJsonFn.push(`\n  let ${snakeCaseVarname} : ${subType}? = match json.get("${keyname}") {\n    Some(${subMatchType}(${snakeCaseVarname})) => `) // Some(${snakeCaseVarname})\n    _ => None\n  }`)
@@ -548,7 +558,7 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
             if (isOption) {
               allBuilders.fromJsonFn.push(`\n  let ${snakeCaseVarname} : ${typename}? = match json.get("${keyname}") {\n    Some(Object(${snakeCaseVarname})) => Some(@json.from_json!(${snakeCaseVarname}.to_json()))\n    Some(Null) | None => None\n    _ => raise @json.JsonDecodeError((path, "${parentName}::from_json:${snakeCaseVarname} expected ${typename} or Null"))\n  }`)
             } else {
-              allBuilders.fromJsonFn.push(`subMatchType='${subMatchType}' // TODO1`)
+              allBuilders.fromJsonFn.push(`\n  let ${snakeCaseVarname} : ${typename} = match json.get("${keyname}") {\n    Some(Object(${snakeCaseVarname})) => @json.from_json!(${snakeCaseVarname}.to_json())\n    _ => raise @json.JsonDecodeError((path, "${parentName}::from_json:${snakeCaseVarname} expected ${typename}"))\n  }`)
             }
             break
           case 'Json':
