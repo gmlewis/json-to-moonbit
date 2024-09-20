@@ -1,3 +1,3 @@
 #!/bin/bash -e
 bun json-to-moonbit.test.js
-moon test
+moon test --target wasm
