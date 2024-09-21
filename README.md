@@ -18,6 +18,8 @@ Contributions are welcome! Open a pull request to fix a bug, or open an issue to
 
   ```sh
   node json-to-moonbit.js sample.json
+  # or
+  bun json-to-moonbit.js sample.json
   ```
 
 - Read JSON file from stdin:
@@ -25,6 +27,9 @@ Contributions are welcome! Open a pull request to fix a bug, or open an issue to
   ```sh
   node json-to-moonbit.js < sample.json
   cat sample.json | node json-to-moonbit.js
+  # or
+  bun json-to-moonbit.js < sample.json
+  cat sample.json | bun json-to-moonbit.js
   ```
 
 ## Status
