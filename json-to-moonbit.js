@@ -54,7 +54,7 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
   let parent = ''
   let globallySeenTypeNames = []
   let previousParents = ''
-  let fieldHasTypeJson = false
+  let structFieldHasTypeJson = {}
 
   try {
     data = JSON.parse(json.replace(/(:\s*\[?\s*-?\d*)\.0/g, "$1.1")) // hack that forces Doubles to stay as Doubles
@@ -129,8 +129,8 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
                 if (!areSameType(existingValue, currentValue)) {
                   if (existingValue !== null) {
                     allFields[keyname].value = null // force type "Json" if types are not identical
-                    fieldHasTypeJson = true
-                    console.warn(`Warning: key "${keyname}" uses multiple types. Defaulting to type "Json".`)
+                    structFieldHasTypeJson[parent] = true
+                    console.warn(`Warning: key "${parent}.${keyname}" uses multiple types. Defaulting to type "Json".`)
                   }
                   allFields[keyname].count++
                   continue
@@ -283,7 +283,7 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
         updateAllBuilders(scope, safeMoonBitVarname, keyname, typename, parentName, allBuilders, isOption)
       }
       indenter(--innerTabs)
-      if (allJsonFieldNamesIdentical && !allOmitempty && !fieldHasTypeJson) {
+      if (allJsonFieldNamesIdentical && !allOmitempty && !structFieldHasTypeJson[parentName]) {
         appender("} derive(Show, Eq, ToJson, FromJson)")
         allBuilders.structNewConstructor.push('\n  }\n}')
         appender(allBuilders.structNewConstructor.join(''))
@@ -348,7 +348,7 @@ function jsonToMoonBit(json, typename, flatten = true, example = false, allOmite
         updateAllBuilders(scope, safeMoonBitVarname, keyname, typename, parentName, allBuilders, isOption)
       }
       indent(--tabs)
-      if (allJsonFieldNamesIdentical && !allOmitempty && !fieldHasTypeJson) {
+      if (allJsonFieldNamesIdentical && !allOmitempty && !structFieldHasTypeJson[parentName]) {
         append("} derive(Show, Eq, ToJson, FromJson)")
         allBuilders.structNewConstructor.push('\n  }\n}')
         append(allBuilders.structNewConstructor.join(''))
